@@ -22,7 +22,7 @@ def qr_pivoting_householder(A):
 
     for i in range(min(m, n)):
         # Pivoting based on the maximum norm of remaining columns
-        max_col = np.argmax(np.linalg.norm(R[i:, i:], axis=0)) + i
+        max_col = np.argmax(np.linalg.norm(R[:, i:], axis=0)) + i
         P[:, [i, max_col]] = P[:, [max_col, i]]
         R[:, [i, max_col]] = R[:, [max_col, i]]
 
