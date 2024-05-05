@@ -6,6 +6,34 @@ import numpy.linalg as la
 import scipy.linalg as scila
 import time 
 
+def householder_reflection(a):
+    """Create the Householder matrix that will zero out the sub-diagonal elements of matrix a."""
+    v = a.copy()
+    v[0] += np.sign(a[0]) * np.linalg.norm(a)
+    v = v / np.linalg.norm(v)
+    H = np.eye(len(a)) - 2 * np.outer(v, v)
+    return H
+
+def qr_pivoting_householder(A):
+    m, n = A.shape
+    Q = np.eye(m)
+    R = A.copy()
+    P = np.eye(n)
+
+    for i in range(min(m, n)):
+        # Pivoting based on the maximum norm of remaining columns
+        max_col = np.argmax(np.linalg.norm(R[i:, i:], axis=0)) + i
+        P[:, [i, max_col]] = P[:, [max_col, i]]
+        R[:, [i, max_col]] = R[:, [max_col, i]]
+
+        # Apply Householder reflection
+        H = np.eye(m)
+        H[i:, i:] = householder_reflection(R[i:, i])
+        R = np.dot(H, R)
+        Q = np.dot(Q, H.T)
+
+    return Q, R, P
+
 def solve_linear_system(A, b):
     Q, R, P, rank = rrqr_householder(A)  
     Qb = np.dot(Q.T, b)  # Transform b by Q transpose
