@@ -34,47 +34,6 @@ def qr_pivoting_householder(A):
 
     return Q, R, P
 
-def solve_linear_system(A, b):
-    Q, R, P, rank = rrqr_householder(A)  
-    Qb = np.dot(Q.T, b)  # Transform b by Q transpose
-    
-    # Solve Rx = Q^Tb using back substitution
-    x = np.linalg.solve(R[:R.shape[1]], Qb[:R.shape[1]])
-    return x
-
-# QR factorization of A using Householder reflections
-def rrqr_householder(A):
-    m, n = A.shape
-    Q = np.eye(m) 
-    R = A.copy()  
-    P = np.arange(n)  
-    rank = 0  
-    
-    for j in range(n):
-        # Find the column with the maximum norm from j to n
-        col_norms = np.linalg.norm(R[:, j:], axis=0)
-        max_col_idx = np.argmax(col_norms) + j
-        
-        # Swap the current column with the maximum norm column
-        R[:, [j, max_col_idx]] = R[:, [max_col_idx, j]]
-        Q[:, [j, max_col_idx]] = Q[:, [max_col_idx, j]]
-        P[j], P[max_col_idx] = P[max_col_idx], P[j]
-        
-        # Apply Householder transformation to eliminate subdiagonal elements
-        x = R[j:, j]
-        v = np.zeros_like(x)
-        v[0] = np.linalg.norm(x)
-        v += np.sign(x[0]) * np.linalg.norm(x) * np.eye(len(x))[0]
-        R[j:, :] -= 2 * np.outer(v, v) @ R[j:, :]
-        Q[:, j:] -= 2 * Q[:, j:] @ np.outer(v, v)
-        
-        # Increment rank if the diagonal element is nonzero
-        if np.abs(R[j, j]) > 1e-10:
-            rank += 1
-        
-    return Q, R, P, rank
-
-
 #These subroutines are from Lab 12 
 def driver():
     ''' Create an ill-conditioned rectangular matrix '''
